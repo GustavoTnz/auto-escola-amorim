@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Escola Amorim | CNH em Feira de Santana</title>
+<meta name="description" content="Auto Escola Amorim - Centro de Formação de Condutores em Feira de Santana. Teórica A/B, prática de carro, categorias C/D, reciclagem e um espaço exclusivo para elas.">
+<link rel="icon" href="./assets/logo_autoescola_amorim_transparente.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Teko:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'], display: ['Oswald', 'system-ui', 'sans-serif'], condensed: ['Teko', 'system-ui', 'sans-serif'] },
+        colors: {
+          amarelo: { 50: '#fffbea', 100: '#fff3c4', 300: '#ffe066', 400: '#F5B800', 500: '#E0A800' },
+          vermelho: { 50: '#fdecec', 100: '#fbd0d2', 400: '#e5342f', 500: '#B91C1C', 600: '#a01818', 700: '#7F1D1D' },
+          preto: { DEFAULT: '#111111', 900: '#0d0d0d' },
+          'brand-yellow': '#F5B800',
+          'brand-yellow-hover': '#E0A800',
+          'brand-red': '#B91C1C',
+          'brand-red-dark': '#7F1D1D'
+        },
+        boxShadow: {
+          apple: '0 1px 2px rgba(0,0,0,0.04), 0 2px 10px rgba(0,0,0,0.05)',
+          col: '0 30px 60px -15px rgba(0,0,0,0.45)'
+        }
+      }
+    }
+  }
+</script>
+<style>
+  /* ---- Motion tokens (animate / emil-design-eng) ---- */
+  :root {
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-splash: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Paleta institucional única — amarelo e vermelho compartilham exatamente
+       este tom em todas as seções (navbar, diferenciais, formulário, splash). */
+    --color-brand-yellow: #F5B800;
+    --color-brand-yellow-hover: #E0A800;
+    --color-brand-red: #B91C1C;
+    --color-brand-red-dark: #7F1D1D;
+  }
+
+  html { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+  h1, h2, h3, h4, .font-display { font-family: 'Oswald', system-ui, sans-serif; }
+
+  /* Reserve the full viewport up front so nothing shifts when JS finishes loading (CLS 0) */
+  html, body { height: 100%; }
+  body.locked { overflow: hidden; }
+
+  /* ---------------------------------------------------
+     SPLASH SCREEN
+  --------------------------------------------------- */
+  #splash {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--color-brand-yellow, #F5B800);
+    background-color: #F5B800;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 700ms var(--ease-splash);
+    will-change: transform;
+  }
+  #splash.leave { transform: translateY(-100%); }
+  #splash img {
+    width: 12rem;
+    animation: splash-pulse 1.7s var(--ease-in-out) infinite;
+  }
+  @keyframes splash-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.045); }
+  }
+
+  /* ---------------------------------------------------
+     SCROLL REVEAL
+  --------------------------------------------------- */
+  .reveal {
+    opacity: 0; transform: translateY(22px);
+    transition: opacity 600ms var(--ease-out), transform 600ms var(--ease-out);
+  }
+  .reveal.in-view { opacity: 1; transform: translateY(0); }
+
+  /* Reveal direcional (seção Centros de Treinamento). Os cards de CT já têm sua
+     própria classe Tailwind transition-[transform,border-color,box-shadow] para
+     o hover — como ambas as regras são um único seletor de classe (mesma
+     especificidade), o Tailwind CDN pode vencer essa dependendo da ordem de
+     injeção do seu stylesheet, fazendo o fade de opacidade não transicionar e o
+     transform sair na duração/easing errados. Um seletor composto (.reveal-up.reveal-up)
+     eleva a especificidade o suficiente para garantir que a transition do reveal
+     sempre vença, sem depender dessa ordem. */
+  .reveal-left, .reveal-up {
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .reveal-left { transform: translateX(-50px); }
+  .reveal-up { transform: translateY(50px); }
+  .reveal-left.reveal-left, .reveal-up.reveal-up {
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-visible {
+    opacity: 1 !important;
+    transform: translate(0, 0) !important;
+  }
+
+  /* ---------------------------------------------------
+     HERO — DIAGONAL COLUMNS (clip-path, image never distorted)
+  --------------------------------------------------- */
+  .diag-col {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  /* The diagonal cut is a FIXED pixel offset, not a percentage — this is what keeps
+     every card the same visual width and makes adjacent cuts line up perfectly even
+     though the cards themselves (especially the wider form column) differ in width.
+     A percentage cut would inset each card relative to its own width, so a wider
+     card needs more overlap than a narrow one — which is exactly what caused the
+     gap before the form column and the width mismatch on the first card. */
+  @media (min-width: 1024px) {
+    .diag-row { overflow: hidden; } /* crops the first card's overlap bleed past the left edge */
+    .diag-col, .diag-col-last {
+      clip-path: polygon(56px 0, 100% 0, calc(100% - 56px) 100%, 0 100%);
+      margin-left: -56px;
+    }
+    /* Last card (form): same left-edge slant as the rest, but flush on the right — it's the end of the row */
+    .diag-col-last {
+      clip-path: polygon(56px 0, 100% 0, 100% 100%, 0 100%);
+    }
+  }
+
+  /* Sangria de 16px (> os 12px do lift no hover) em foto/overlay/sombra: como só
+     .diag-lift se move e essas três camadas são filhas dele (herdam o translateY
+     sem transform próprio), a borda inferior de cada uma continua cobrindo o
+     .diag-col mesmo depois de subir — sem isso, a base do card recuada revela
+     o fundo escuro da seção por trás (o "corte cinza" reportado). */
+  .diag-photo {
+    position: absolute; inset: -16px;
+    background-size: cover;
+    background-position: center;
+    transform: scale(1.001); /* establishes its own layer, avoids seam flicker */
+    transition: transform 500ms cubic-bezier(0.2, 0, 0, 1);
+    will-change: transform;
+  }
+  .diag-overlay {
+    position: absolute; inset: -16px;
+    background: linear-gradient(180deg, rgba(17,17,17,0.35) 0%, rgba(17,17,17,0.72) 78%, rgba(17,17,17,0.85) 100%);
+    transition: opacity 450ms var(--ease-out);
+  }
+  .diag-shadow {
+    position: absolute; inset: -16px;
+    box-shadow: 0 30px 60px -12px rgba(0,0,0,0.55);
+    opacity: 0;
+    transition: opacity 350ms var(--ease-out);
+    pointer-events: none;
+  }
+  .diag-lift {
+    height: 100%; width: 100%;
+    transition: transform 350ms cubic-bezier(0.2, 0, 0, 1);
+    will-change: transform;
+  }
+  /* .diag-content não tem transition/transform próprios: sobe junto por herdar
+     o translateY do pai (.diag-lift), nunca por uma regra de hover separada —
+     assim não tem como as duas camadas se dessincronizarem. */
+
+  /* .diag-lift é a ÚNICA camada que recebe translateY no hover — como todas as
+     outras (foto, overlay, sombra, conteúdo) são filhas dela, sobem juntas por
+     herança de transform, nunca por regras próprias que poderiam dessincronizar. */
+  @media (hover: hover) and (pointer: fine) {
+    .diag-col:hover .diag-lift { transform: translateY(-12px); }
+    .diag-col:hover .diag-photo { transform: scale(1.04); }
+    .diag-col:hover .diag-overlay { opacity: 0.72; }
+    .diag-col:hover .diag-shadow { opacity: 1; }
+  }
+
+  /* Glow ambiente no hover: um ::after na própria .diag-col (não em .diag-lift),
+     então fica parado enquanto o conjunto foto+texto sobe por cima — e como
+     .diag-col já recorta em clip-path, o brilho respeita o mesmo corte diagonal
+     sem precisar de nenhum cálculo extra. z-index 5 fica acima da foto/overlay
+     (camada implícita) e abaixo do .diag-content (z-index 10), então o texto
+     nunca perde legibilidade. */
+  .diag-col::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.35s ease-in-out;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .diag-col:not(.is-sopraelas):hover::after {
+      background: radial-gradient(circle at center bottom, rgba(250, 204, 21, 0.22) 0%, rgba(234, 179, 8, 0.08) 50%, transparent 80%);
+      opacity: 1;
+    }
+    .diag-col.is-sopraelas:hover::after {
+      background: radial-gradient(circle at center bottom, rgba(225, 29, 116, 0.25) 0%, rgba(216, 27, 96, 0.1) 50%, transparent 80%);
+      opacity: 1;
+    }
+  }
+
+  /* ---------------------------------------------------
+     TABS — panels stacked to avoid layout shift
+  --------------------------------------------------- */
+  .tab-stack { display: grid; }
+  .tab-panel {
+    grid-area: 1 / 1;
+    opacity: 0; transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 250ms var(--ease-out), transform 250ms var(--ease-out);
+  }
+  .tab-panel.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+  /* ---------------------------------------------------
+     FORM FIELDS — focus feedback
+  --------------------------------------------------- */
+  .field { transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out), transform 200ms var(--ease-out); }
+  .field:focus { border-color: #F5B800; transform: translateY(-1px); }
+
+  .timeline-line { background: linear-gradient(180deg, transparent, #e30613 8%, #e30613 92%, transparent); }
+
+  /* Carrossel da Frota (mobile): scroll nativo por toque, barra de rolagem oculta */
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
+  /* Destaque do card de unidade selecionado (mapa). Classe própria em vez de
+     ring-2/ring-* do Tailwind: essas classes são adicionadas via JS depois do
+     carregamento inicial, e o compilador do Tailwind CDN não as combina de forma
+     confiável com o box-shadow customizado (shadow-apple) já aplicado ao card —
+     o anel fica definido nas variáveis CSS mas nunca aparece de fato no render. */
+  .unit-card.is-active {
+    border-color: #F5B800;
+    box-shadow: 0 8px 25px -4px rgba(0,0,0,0.12);
+    transform: scale(1.01);
+  }
+  /* Só Pra Elas usa o rosa institucional da unidade em vez do amarelo padrão
+     ao ser selecionada — mesmo mecanismo estático acima, cor diferente. */
+  .unit-card.is-active[data-unit="so-pra-elas"] {
+    border-color: #E11D74;
+    box-shadow: 0 8px 25px -4px rgba(225,29,116,0.25);
+    transform: scale(1.01);
+  }
+  /* Destaque temporário do card Só Pra Elas ao chegar pelo scroll suave do chip
+     (mesmo motivo do .unit-card.is-active acima: ring-2/ring-offset-* do Tailwind
+     adicionados via JS não pintam de forma confiável no Tailwind CDN). */
+  .sopraelas-highlight {
+    box-shadow: 0 0 0 2px #000, 0 0 0 4px #E11D74;
+  }
+
+  /* Seletor de abas (Serviços): mesmo motivo do .unit-card.is-active acima — bg-vermelho-600/
+     text-white alternados via classList.toggle() no botão clicado não pintam de forma confiável
+     (o Tailwind CDN só garante as classes que já estavam em algum elemento no carregamento
+     inicial; herdar/mover essas mesmas classes para outro elemento via JS não é confiável).
+     Classe estática própria em vez de reencaixar utilitários do Tailwind em runtime. */
+  .tab-btn { background-color: #fff; color: #262626; border-color: #e5e5e5; }
+  .tab-btn:hover:not(.is-active) { background-color: #fafafa; }
+  .tab-btn.is-active { background-color: #B91C1C; color: #fff; border-color: #B91C1C; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+  /* Carrossel de fotos dos CTs: crossfade só em CSS (sem JS), duas imagens empilhadas
+     compartilham o mesmo keyframe, a segunda com metade do ciclo de atraso (fase oposta). */
+  @keyframes ct-crossfade {
+    0%, 40% { opacity: 1; }
+    50%, 90% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  .ct-slide { animation: ct-crossfade 7s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    #splash img { animation: none; }
+    .reveal, .reveal-left, .reveal-up { opacity: 1 !important; transform: none !important; }
+    .diag-col:hover .diag-lift,
+    .diag-col:hover .diag-photo { transform: none !important; }
+    .ct-slide { animation: none !important; opacity: 0 !important; }
+    .ct-slide:first-child { opacity: 1 !important; }
+  }
+</style>
+</head>
+<body class="bg-white text-preto antialiased locked">
+
+<!-- =========================================================
+     SPLASH SCREEN
+========================================================= -->
+<div id="splash" aria-hidden="true">
+  <img src="./assets/logo_autoescola_amorim_transparente.png" alt="Auto Escola Amorim" width="192" height="192" fetchpriority="high">
+</div>
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+<header id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-amarelo-400 border-b border-black/10 shadow-sm transition-transform duration-200 ease-out will-change-transform">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 h-[72px] flex items-center justify-between gap-4">
+
+    <a href="#inicio" class="flex items-center gap-3 shrink-0">
+      <img src="./assets/logo_autoescola_amorim_transparente.png" alt="Auto Escola Amorim" width="40" height="40" fetchpriority="high" class="h-10 w-auto">
+      <span class="font-display font-extrabold text-[15px] leading-none tracking-tight">
+        <span class="text-preto">AUTO ESCOLA </span><span class="text-vermelho-500">AMORIM</span>
+      </span>
+    </a>
+
+    <nav class="hidden lg:flex items-center gap-1">
+      <a href="#inicio" class="px-4 py-2 text-sm font-semibold text-preto hover:text-vermelho-500 transition-colors duration-200 ease-out">Início</a>
+      <a href="#diferenciais" class="px-4 py-2 text-sm font-semibold text-preto hover:text-vermelho-500 transition-colors duration-200 ease-out">Diferenciais</a>
+      <a href="#servicos" class="px-4 py-2 text-sm font-semibold text-preto hover:text-vermelho-500 transition-colors duration-200 ease-out">Serviços</a>
+      <a href="#unidades" class="px-4 py-2 text-sm font-semibold text-preto hover:text-vermelho-500 transition-colors duration-200 ease-out">Unidades</a>
+      <a href="#contato" class="px-4 py-2 text-sm font-semibold text-preto hover:text-vermelho-500 transition-colors duration-200 ease-out">Contato</a>
+    </nav>
+
+    <div class="hidden lg:flex items-center gap-2.5">
+      <a href="https://whatsapp.amorimautoescola.com.br/?utm_source=ig&utm_medium=social&utm_content=link_in_bio"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/90 hover:bg-white text-neutral-900 font-bold text-xs sm:text-sm tracking-wide border border-black/10 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6.5C10.753 6.5 6.5 10.753 6.5 16c0 1.77.487 3.427 1.336 4.846L6.5 25.5l4.823-1.299A9.458 9.458 0 0016 25.5c5.247 0 9.5-4.253 9.5-9.5S21.247 6.5 16 6.5zm5.534 13.064c-.23.645-1.144 1.185-1.597 1.258-.413.066-.948.093-1.53-.093-.356-.113-.816-.279-1.408-.535-2.483-1.074-4.103-3.585-4.227-3.75-.124-.165-1.008-1.34-1.008-2.556 0-1.216.638-1.814.865-2.062.227-.247.495-.309.66-.309.165 0 .33.002.474.009.153.008.358-.058.558.423.206.495.702 1.713.764 1.837.062.124.103.268.02.433-.082.165-.124.268-.247.412-.124.144-.26.322-.372.433-.124.124-.253.258-.109.505.144.247.64 1.055 1.374 1.709.945.842 1.742 1.103 1.99 1.227.247.124.392.103.536-.062.144-.165.619-.722.784-.97.165-.247.33-.206.557-.124.227.082 1.444.681 1.692.805.247.124.412.186.474.289.062.103.062.598-.168 1.243z" fill="#FFFFFF"/></svg>
+        <span>Faça seu orçamento</span>
+      </a>
+
+      <a href="https://instagram.com/autoescola_amorim"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Instagram Auto Escola Amorim"
+         class="w-9 h-9 rounded-full bg-white hover:bg-neutral-50 text-neutral-900 border border-black/10 flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95">
+        <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.9.2 2.3.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1.1.4 2.3.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.9-.4 2.3-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1.1.4-2.3.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.9-.2-2.3-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1.1-.4-2.3-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.2-1.9.4-2.3.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1.1-.4 2.3-.4 1.3-.1 1.7-.1 4.9-.1M12 0C8.7 0 8.3 0 7 .1 5.7.1 4.8.3 4 .6c-.8.3-1.5.7-2.2 1.4C1.1 2.7.7 3.4.4 4.2.1 5 0 5.9 0 7.2 0 8.5 0 8.9 0 12s0 3.5.1 4.8c.1 1.3.3 2.2.6 3 .3.8.7 1.5 1.4 2.2.7.7 1.4 1.1 2.2 1.4.8.3 1.7.5 3 .6C8.3 24 8.7 24 12 24s3.5 0 4.8-.1c1.3-.1 2.2-.3 3-.6.8-.3 1.5-.7 2.2-1.4.7-.7 1.1-1.4 1.4-2.2.3-.8.5-1.7.6-3 .1-1.3.1-1.7.1-4.8s0-3.5-.1-4.8c-.1-1.3-.3-2.2-.6-3-.3-.8-.7-1.5-1.4-2.2C21.3 1.1 20.6.7 19.8.4c-.8-.3-1.7-.5-3-.6C15.5 0 15.1 0 12 0z"/><path d="M12 5.8A6.2 6.2 0 1 0 18.2 12 6.2 6.2 0 0 0 12 5.8zm0 10.2A4 4 0 1 1 16 12a4 4 0 0 1-4 4zM18.4 4a1.44 1.44 0 1 0 1.44 1.44A1.44 1.44 0 0 0 18.4 4z"/></svg>
+      </a>
+    </div>
+
+    <div class="flex items-center gap-2 lg:hidden">
+      <a href="https://whatsapp.amorimautoescola.com.br/?utm_source=ig&utm_medium=social&utm_content=link_in_bio"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white active:bg-neutral-50 text-neutral-900 font-bold text-[11px] border border-black/10 shadow-sm">
+        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6.5C10.753 6.5 6.5 10.753 6.5 16c0 1.77.487 3.427 1.336 4.846L6.5 25.5l4.823-1.299A9.458 9.458 0 0016 25.5c5.247 0 9.5-4.253 9.5-9.5S21.247 6.5 16 6.5zm5.534 13.064c-.23.645-1.144 1.185-1.597 1.258-.413.066-.948.093-1.53-.093-.356-.113-.816-.279-1.408-.535-2.483-1.074-4.103-3.585-4.227-3.75-.124-.165-1.008-1.34-1.008-2.556 0-1.216.638-1.814.865-2.062.227-.247.495-.309.66-.309.165 0 .33.002.474.009.153.008.358-.058.558.423.206.495.702 1.713.764 1.837.062.124.103.268.02.433-.082.165-.124.268-.247.412-.124.144-.26.322-.372.433-.124.124-.253.258-.109.505.144.247.64 1.055 1.374 1.709.945.842 1.742 1.103 1.99 1.227.247.124.392.103.536-.062.144-.165.619-.722.784-.97.165-.247.33-.206.557-.124.227.082 1.444.681 1.692.805.247.124.412.186.474.289.062.103.062.598-.168 1.243z" fill="#FFFFFF"/></svg>
+        <span>Orçamento</span>
+      </a>
+
+      <a href="https://instagram.com/autoescola_amorim"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Instagram Auto Escola Amorim"
+         class="w-7 h-7 rounded-full bg-white active:bg-neutral-50 text-neutral-900 border border-black/10 flex items-center justify-center shadow-sm">
+        <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 fill-current"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.9.2 2.3.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1.1.4 2.3.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.9-.4 2.3-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1.1.4-2.3.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.9-.2-2.3-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1.1-.4-2.3-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.2-1.9.4-2.3.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1.1-.4 2.3-.4 1.3-.1 1.7-.1 4.9-.1M12 0C8.7 0 8.3 0 7 .1 5.7.1 4.8.3 4 .6c-.8.3-1.5.7-2.2 1.4C1.1 2.7.7 3.4.4 4.2.1 5 0 5.9 0 7.2 0 8.5 0 8.9 0 12s0 3.5.1 4.8c.1 1.3.3 2.2.6 3 .3.8.7 1.5 1.4 2.2.7.7 1.4 1.1 2.2 1.4.8.3 1.7.5 3 .6C8.3 24 8.7 24 12 24s3.5 0 4.8-.1c1.3-.1 2.2-.3 3-.6.8-.3 1.5-.7 2.2-1.4.7-.7 1.1-1.4 1.4-2.2.3-.8.5-1.7.6-3 .1-1.3.1-1.7.1-4.8s0-3.5-.1-4.8c-.1-1.3-.3-2.2-.6-3-.3-.8-.7-1.5-1.4-2.2C21.3 1.1 20.6.7 19.8.4c-.8-.3-1.7-.5-3-.6C15.5 0 15.1 0 12 0z"/><path d="M12 5.8A6.2 6.2 0 1 0 18.2 12 6.2 6.2 0 0 0 12 5.8zm0 10.2A4 4 0 1 1 16 12a4 4 0 0 1-4 4zM18.4 4a1.44 1.44 0 1 0 1.44 1.44A1.44 1.44 0 0 0 18.4 4z"/></svg>
+      </a>
+    </div>
+
+    <button id="menu-toggle" aria-label="Abrir menu" aria-expanded="false" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-full text-preto hover:bg-black/10 transition-colors duration-200">
+      <svg id="icon-open" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <svg id="icon-close" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div id="mobile-menu" class="lg:hidden hidden border-t border-black/10 bg-amarelo-400">
+    <nav class="px-5 py-4 flex flex-col gap-1">
+      <a href="#inicio" class="mobile-link px-3 py-2.5 rounded-lg text-preto font-medium hover:bg-black/10 transition-colors">Início</a>
+      <a href="#diferenciais" class="mobile-link px-3 py-2.5 rounded-lg text-preto font-medium hover:bg-black/10 transition-colors">Diferenciais</a>
+      <a href="#servicos" class="mobile-link px-3 py-2.5 rounded-lg text-preto font-medium hover:bg-black/10 transition-colors">Serviços</a>
+      <a href="#unidades" class="mobile-link px-3 py-2.5 rounded-lg text-preto font-medium hover:bg-black/10 transition-colors">Unidades</a>
+      <a href="#contato" class="mobile-link px-3 py-2.5 rounded-lg text-preto font-medium hover:bg-black/10 transition-colors">Contato</a>
+    </nav>
+  </div>
+</header>
+
+<main class="pt-[72px]">
+
+<!-- =========================================================
+     HERO — 6 COLUNAS DIAGONAIS
+========================================================= -->
+<section id="inicio" class="relative bg-preto-900 scroll-mt-[72px]">
+  <div class="diag-row lg:flex lg:h-[calc(100vh-72px)] lg:min-h-[560px]">
+
+    <!-- Indicador de carrossel (mobile/tablet apenas) -->
+    <div class="px-4 pt-4 pb-2 lg:hidden flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-amarelo-400 animate-pulse"></span>
+        <h2 class="text-xs font-black uppercase tracking-wider text-white">Nossas Unidades</h2>
+      </div>
+      <a href="#unidade-sopraelas" id="chip-sopraelas" class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#E11D74] hover:bg-[#c21461] text-white text-[11px] font-black uppercase tracking-wide shadow-sm transition-colors">
+        <span>Só Pra Elas</span>
+        <span>→</span>
+      </a>
+    </div>
+
+    <!-- Carrossel horizontal com swipe (mobile/tablet); no desktop os 5 cards "sobem"
+         para virar filhos diretos do flex .diag-row via display:contents, preservando
+         o layout diagonal original sem duplicar nenhuma regra de clip-path/flex-1. -->
+    <div class="flex overflow-x-auto snap-x snap-mandatory snap-always gap-4 px-[10vw] scroll-px-[10vw] py-2 no-scrollbar lg:contents">
+
+    <!-- Coluna 1 -->
+    <div class="diag-col reveal h-[320px] sm:h-[360px] lg:h-auto lg:flex-1 w-[80vw] sm:w-[50vw] lg:w-auto shrink-0 snap-center rounded-2xl lg:rounded-none">
+      <div class="diag-lift relative h-full">
+        <div class="diag-photo" style="background-image:url('./assets/Joao%20Durval.jpg'); background-size: 145%; background-position: 88% 8%;"></div>
+        <div class="diag-overlay"></div>
+        <div class="diag-shadow"></div>
+        <div class="diag-content relative z-10 h-full flex flex-col items-center justify-end text-center pl-16 pr-14 pb-4 sm:pb-5 lg:pb-8 text-white">
+          <p class="font-condensed uppercase italic text-white/90 text-xs tracking-[0.15em] mb-0.5">Unidade</p>
+          <h3 class="font-condensed uppercase italic text-amarelo-400 text-3xl lg:text-4xl leading-[0.85] mb-3 max-w-[85%]">João Durval</h3>
+          <div class="bg-black/60 border border-amarelo-400 rounded-lg px-2.5 py-2 mb-3.5 max-w-[85%]">
+            <p class="text-[11px] text-white leading-snug">Av. João Durval, 1381, Brasília.</p>
+          </div>
+          <a href="https://wa.me/5575993010030?text=Vim%20pelo%20site%20e%20desejo%20fazer%20um%20or%C3%A7amento" target="_blank" rel="noopener noreferrer"
+             class="flex items-center justify-center gap-2 w-full max-w-[85%] py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-amarelo-400 text-white font-display text-xs font-semibold tracking-wide transition-[background-color,border-color,backdrop-filter,transform] duration-200 ease-out hover:scale-[1.02] active:scale-[0.98]">
+            <svg class="w-4 h-4 shrink-0 inline-block mr-1.5" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6.5C10.753 6.5 6.5 10.753 6.5 16c0 1.77.487 3.427 1.336 4.846L6.5 25.5l4.823-1.299A9.458 9.458 0 0016 25.5c5.247 0 9.5-4.253 9.5-9.5S21.247 6.5 16 6.5zm5.534 13.064c-.23.645-1.144 1.185-1.597 1.258-.413.066-.948.093-1.53-.093-.356-.113-.816-.279-1.408-.535-2.483-1.074-4.103-3.585-4.227-3.75-.124-.165-1.008-1.34-1.008-2.556 0-1.216.638-1.814.865-2.062.227-.247.495-.309.66-.309.165 0 .33.002.474.009.153.008.358-.058.558.423.206.495.702 1.713.764 1.837.062.124.103.268.02.433-.082.165-.124.268-.247.412-.124.144-.26.322-.372.433-.124.124-.253.258-.109.505.144.247.64 1.055 1.374 1.709.945.842 1.742 1.103 1.99 1.227.247.124.392.103.536-.062.144-.165.619-.722.784-.97.165-.247.33-.206.557-.124.227.082 1.444.681 1.692.805.247.124.412.186.474.289.062.103.062.598-.168 1.243z" fill="#FFFFFF"/></svg>
+            Faça seu orçamento
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna 2 -->
+    <div class="diag-col reveal h-[320px] sm:h-[360px] lg:h-auto lg:flex-1 w-[80vw] sm:w-[50vw] lg:w-auto shrink-0 snap-center rounded-2xl lg:rounded-none" style="transition-delay:.06s">
+      <div class="diag-lift relative h-full">
+        <div class="diag-photo" style="background-image:url('./assets/JJ%20Seabra.jpg'); background-position: center 15%;"></div>
+        <div class="diag-overlay"></div>
+        <div class="diag-shadow"></div>
+        <div class="diag-content relative z-10 h-full flex flex-col items-center justify-end text-center pl-4 pr-14 pb-4 sm:pb-5 lg:pb-8 text-white">
+          <p class="font-condensed uppercase italic text-white/90 text-xs tracking-[0.15em] mb-0.5">Unidade</p>
+          <h3 class="font-condensed uppercase italic text-amarelo-400 text-4xl lg:text-5xl leading-[0.85] mb-3 max-w-[85%]">JJ Seabra</h3>
+          <div class="bg-black/60 border border-amarelo-400 rounded-lg px-3.5 py-2 mb-3.5 max-w-[85%]">
+            <p class="text-[11px] text-white leading-snug">Rua J. J. Seabra, 350, Centro.</p>
+          </div>
+          <a href="https://wa.me/5575991151793?text=Vim%20pelo%20site%20e%20desejo%20fazer%20um%20or%C3%A7amento" target="_blank" rel="noopener noreferrer"
+             class="flex items-center justify-center gap-2 w-full max-w-[85%] py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-amarelo-400 text-white font-display text-xs font-semibold tracking-wide transition-[background-color,border-color,backdrop-filter,transform] duration-200 ease-out hover:scale-[1.02] active:scale-[0.98]">
+            <svg class="w-4 h-4 shrink-0 inline-block mr-1.5" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6.5C10.753 6.5 6.5 10.753 6.5 16c0 1.77.487 3.427 1.336 4.846L6.5 25.5l4.823-1.299A9.458 9.458 0 0016 25.5c5.247 0 9.5-4.253 9.5-9.5S21.247 6.5 16 6.5zm5.534 13.064c-.23.645-1.144 1.185-1.597 1.258-.413.066-.948.093-1.53-.093-.356-.113-.816-.279-1.408-.535-2.483-1.074-4.103-3.585-4.227-3.75-.124-.165-1.008-1.34-1.008-2.556 0-1.216.638-1.814.865-2.062.227-.247.495-.309.66-.309.165 0 .33.002.474.009.153.008.358-.058.558.423.206.495.702 1.713.764 1.837.062.124.103.268.02.433-.082.165-.124.268-.247.412-.124.144-.26.322-.372.433-.124.124-.253.258-.109.505.144.247.64 1.055 1.374 1.709.945.842 1.742 1.103 1.99 1.227.247.124.392.103.536-.062.144-.165.619-.722.784-.97.165-.247.33-.206.557-.124.227.082 1.444.681 1.692.805.247.124.412.186.474.289.062.103.062.598-.168 1.243z" fill="#FFFFFF"/></svg>
+            Faça seu orçamento
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna 3 -->
+    <div class="diag-col reveal h-[320px] sm:h-[360px] lg:h-auto lg:flex-1 w-[80vw] sm:w-[50vw] lg:w-auto shrink-0 snap-center rounded-2xl lg:rounded-none" style="transition-delay:.12s">
+      <div class="diag-lift relative h-full">
+        <div class="diag-photo" style="background-image:url('./assets/Artemia%20Pires.jpg'); background-position: center 10%;"></div>
+        <div class="diag-overlay"></div>
+        <div class="diag-shadow"></div>
+        <div class="diag-content relative z-10 h-full flex flex-col items-center justify-end text-center pl-4 pr-14 pb-4 sm:pb-5 lg:pb-8 text-white">
+          <p class="font-condensed uppercase italic text-white/90 text-xs tracking-[0.15em] mb-0.5">Unidade</p>
+          <h3 class="font-condensed uppercase italic text-amarelo-400 text-4xl lg:text-5xl leading-[0.85] mb-3 max-w-[85%]">Artêmia Pires</h3>
+          <div class="bg-black/60 border border-amarelo-400 rounded-lg px-3.5 py-2 mb-3.5 max-w-[85%]">
+            <p class="text-[11px] text-white leading-snug">Av. Artêmia Pires, 8750, Bairro Sim.</p>
+          </div>
+          <a href="https://wa.me/5575992935378?text=Vim%20pelo%20site%20e%20desejo%20fazer%20um%20or%C3%A7amento" target="_blank" rel="noopener noreferrer"
+             class="flex items-center justify-center gap-2 w-full max-w-[85%] py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-amarelo-400 text-white font-display text-xs font-semibold tracking-wide transition-[background-color,border-color,backdrop-filter,transform] duration-200 ease-out hover:scale-[1.02] active:scale-[0.98]">
+            <svg class="w-4 h-4 shrink-0 inline-block mr-1.5" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6.5C10.753 6.5 6.5 10.753 6.5 16c0 1.77.487 3.427 1.336 4.846L6.5 25.5l4.823-1.299A9.458 9.458 0 0016 25.5c5.247 0 9.5-4.253 9.5-9.5S21.247 6.5 16 6.5zm5.534 13.064c-.23.645-1.144 1.185-1.597 1.258-.413.066-.948.093-1.53-.093-.356-.113-.816-.279-1.408-.535-2.483-1.074-4.103-3.585-4.227-3.75-.124-.165-1.008-1.34-1.008-2.556 0-1.216.638-1.814.865-2.062.227-.247.495-.309.66-.309.165 0 .33.002.474.009.153.008.358-.058.558.423.206.495.702 1.713.764 1.837.062.124.103.268.02.433-.082.165-.124.268-.247.412-.124.144-.26.322-.372.433-.124.124-.253.258-.109.505.144.247.64 1.055 1.374 1.709.945.842 1.742 1.103 1.99 1.227.247.124.392.103.536-.062.144-.165.619-.722.784-.97.165-.247.33-.206.557-.124.227.082 1.444.681 1.692.805.247.124.412.186.474.289.062.103.062.598-.168 1.243z" fill="#FFFFFF"/></svg>
+            Faça seu orçamento
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna 4 -->
+    <div class="diag-col reveal h-[320px] sm:h-[360px] lg:h-auto lg:flex-1 w-[80vw] sm:w-[50vw] lg:w-auto shrink-0 snap-center rounded-2xl lg:rounded-none" style="transition-delay:.18s">
+      <div class="diag-lift relative h-full">
+        <div class="diag-photo" style="background-image:url('./assets/Fraga%20Maia.jpg'); background-size: cover; background-position: center;"></div>
+        <div class="diag-overlay"></div>
+        <div class="diag-shadow"></div>
+        <div class="diag-content relative z-10 h-full flex flex-col items-center justify-end text-center pl-4 pr-14 pb-4 sm:pb-5 lg:pb-8 text-white">
+          <p class="font-condensed uppercase italic text-white/90 text-xs tracking-[0.15em] mb-0.5">Unidade</p>
+          <h3 class="font-condensed uppercase italic text-amarelo-400 text-4xl lg:text-5xl leading-[0.85] mb-3 max-w-[85%]">Fraga Maia</h3>
+          <div class="bg-black/60 border border-amarelo-400 rounded-lg px-3.5 py-2 mb-3.5 max-w-[85%]">
+            <p class="text-[11px] text-white leading-snug">Av. Fraga Maia, 5200, Mangabeira.</p>
+          </div>
+          <a href="https://wa.me/5575983696045?text=Vim%20pelo%20site%20e%20desejo%20fazer%20um%20or%C3%A7amento" target="_blank" rel="noopener noreferrer"
+             class="flex items-center justify-center gap-2 w-full max-w-[85%] py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-amarelo-400 text-white font-display text-xs font-semibold tracking-wide transition-[background-color,border-color,backdrop-filter,transform] duration-200 ease-out hover:scale-[1.02] active:scale-[0.98]">
+            <svg class="w-4 h-4 shrink-0 inline-block mr-1.5" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6.5C10.753 6.5 6.5 10.753 6.5 16c0 1.77.487 3.427 1.336 4.846L6.5 25.5l4.823-1.299A9.458 9.458 0 0016 25.5c5.247 0 9.5-4.253 9.5-9.5S21.247 6.5 16 6.5zm5.534 13.064c-.23.645-1.144 1.185-1.597 1.258-.413.066-.948.093-1.53-.093-.356-.113-.816-.279-1.408-.535-2.483-1.074-4.103-3.585-4.227-3.75-.124-.165-1.008-1.34-1.008-2.556 0-1.216.638-1.814.865-2.062.227-.247.495-.309.66-.309.165 0 .33.002.474.009.153.008.358-.058.558.423.206.495.702 1.713.764 1.837.062.124.103.268.02.433-.082.165-.124.268-.247.412-.124.144-.26.322-.372.433-.124.124-.253.258-.109.505.144.247.64 1.055 1.374 1.709.945.842 1.742 1.103 1.99 1.227.247.124.392.103.536-.062.144-.165.619-.722.784-.97.165-.247.33-.206.557-.124.227.082 1.444.681 1.692.805.247.124.412.186.474.289.062.103.062.598-.168 1.243z" fill="#FFFFFF"/></svg>
+            Faça seu orçamento
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna 5 -->
+    <div id="unidade-sopraelas" class="diag-col is-sopraelas reveal h-[320px] sm:h-[360px] lg:h-auto lg:flex-1 w-[80vw] sm:w-[50vw] lg:w-auto shrink-0 snap-center rounded-2xl lg:rounded-none border-2 border-[#E11D74] shadow-[0_0_15px_rgba(225,29,116,0.35)] lg:border-0 lg:shadow-none scroll-mt-[88px]" style="transition-delay:.24s">
+      <div class="lg:hidden absolute inset-x-0 top-0 z-20 bg-[#E11D74] text-white text-[10px] font-black uppercase tracking-wide text-center py-1.5">ESPAÇO 100% EXCLUSIVO PARA MULHERES</div>
+      <div class="diag-lift relative h-full">
+        <div class="diag-photo" style="background-image:url('./assets/So%20Pra%20Elas.jpg'); background-size: 135%; background-position: 18% 32%;"></div>
+        <div class="diag-overlay"></div>
+        <div class="diag-shadow"></div>
+        <div class="diag-content relative z-10 h-full flex flex-col items-center justify-end text-center pl-4 pr-14 pb-4 sm:pb-5 lg:pb-8 text-white">
+          <p class="font-condensed uppercase italic text-white/90 text-xs tracking-[0.15em] mb-0.5">Unidade</p>
+          <h3 class="font-condensed uppercase italic text-[#E11D74] text-4xl lg:text-5xl leading-[0.85] mb-2 max-w-[85%]">Só Pra Elas</h3>
+          <span class="font-display inline-block bg-[#E11D74] text-white text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3">Espaço Exclusivo para Mulheres</span>
+          <div class="bg-black/60 border border-[#E11D74]/70 rounded-lg px-3.5 py-2 mb-3.5 max-w-[85%]">
+            <p class="text-[11px] text-white leading-snug">Av. Getúlio Vargas, 1631, Centro</p>
+          </div>
+          <a href="https://wa.me/5575999170816?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20conhecer%20a%20unidade%20exclusiva%20para%20mulheres%20S%C3%B3%20Pra%20Elas" target="_blank" rel="noopener noreferrer"
+             class="flex items-center justify-center gap-2 w-full max-w-[85%] py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-[#E11D74] text-white font-display text-xs font-semibold tracking-wide transition-[background-color,border-color,backdrop-filter,transform] duration-200 ease-out hover:scale-[1.02] active:scale-[0.98]">
+            <svg class="w-4 h-4 shrink-0 inline-block mr-1.5" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6.5C10.753 6.5 6.5 10.753 6.5 16c0 1.77.487 3.427 1.336 4.846L6.5 25.5l4.823-1.299A9.458 9.458 0 0016 25.5c5.247 0 9.5-4.253 9.5-9.5S21.247 6.5 16 6.5zm5.534 13.064c-.23.645-1.144 1.185-1.597 1.258-.413.066-.948.093-1.53-.093-.356-.113-.816-.279-1.408-.535-2.483-1.074-4.103-3.585-4.227-3.75-.124-.165-1.008-1.34-1.008-2.556 0-1.216.638-1.814.865-2.062.227-.247.495-.309.66-.309.165 0 .33.002.474.009.153.008.358-.058.558.423.206.495.702 1.713.764 1.837.062.124.103.268.02.433-.082.165-.124.268-.247.412-.124.144-.26.322-.372.433-.124.124-.253.258-.109.505.144.247.64 1.055 1.374 1.709.945.842 1.742 1.103 1.99 1.227.247.124.392.103.536-.062.144-.165.619-.722.784-.97.165-.247.33-.206.557-.124.227.082 1.444.681 1.692.805.247.124.412.186.474.289.062.103.062.598-.168 1.243z" fill="#FFFFFF"/></svg>
+            Faça seu orçamento
+          </a>
+        </div>
+      </div>
+    </div>
+
+    </div>
+    <!-- Fim do carrossel horizontal -->
+
+    <!-- Coluna 6 — CTA / Formulário -->
+    <div class="mt-6 px-4 pb-12 lg:mt-0 lg:px-0 lg:pb-0 lg:flex-[1.35] reveal" style="transition-delay:.3s">
+      <div class="diag-col-last relative h-full min-h-[480px] lg:min-h-0 bg-gradient-to-b from-[#B91C1C] via-[#500707] to-neutral-950 rounded-3xl lg:rounded-none overflow-hidden lg:overflow-visible shadow-[0_10px_30px_rgba(0,0,0,0.8)] lg:shadow-[-10px_0_30px_rgba(0,0,0,0.3)] border-none lg:border-0 lg:border-l lg:border-white/10 ring-0 flex flex-col justify-center p-5 sm:p-6 lg:pt-10 lg:pr-10 lg:pb-10 lg:pl-24 text-white">
+        <h2 class="font-display text-xl sm:text-2xl lg:text-[26px] font-black lg:font-extrabold leading-tight mb-2">
+          Sua jornada para a CNH com a <span class="text-amarelo-400">Auto Escola Amorim</span>
+        </h2>
+        <p class="text-xs sm:text-sm lg:text-sm text-white/80 mb-4 lg:mb-6 leading-relaxed">Preencha seus dados e nossa equipe entra em contato para montar o plano ideal para você.</p>
+
+        <form id="hero-form" class="space-y-2.5 sm:space-y-3.5 lg:space-y-3">
+          <input required type="text" id="hf-nome" placeholder="Seu nome"
+            class="field w-full h-auto bg-white text-preto placeholder-neutral-400 text-sm rounded-xl px-3.5 py-2.5 lg:px-4 lg:py-3 border-2 border-transparent shadow-sm lg:shadow-none focus:ring-2 focus:ring-amarelo-400 focus:outline-none">
+          <input required type="tel" id="hf-whats" placeholder="Seu número (DDD + WhatsApp)"
+            class="field w-full h-auto bg-white text-preto placeholder-neutral-400 text-sm rounded-xl px-3.5 py-2.5 lg:px-4 lg:py-3 border-2 border-transparent shadow-sm lg:shadow-none focus:ring-2 focus:ring-amarelo-400 focus:outline-none">
+          <select id="hf-categoria" class="field w-full h-auto bg-white text-preto text-sm rounded-xl px-3.5 py-2.5 lg:px-4 lg:py-3 border-2 border-transparent shadow-sm lg:shadow-none focus:ring-2 focus:ring-amarelo-400 focus:outline-none">
+            <option>Teórica A/B</option>
+            <option>Prática Carro</option>
+            <option>Categorias C/D</option>
+            <option>Reciclagem</option>
+            <option>Espaço exclusivo (Instrutoras)</option>
+          </select>
+          <select id="hf-unidade" required class="field w-full h-auto bg-white text-preto text-sm rounded-xl px-3.5 py-2.5 lg:px-4 lg:py-3 border-2 border-transparent shadow-sm lg:shadow-none focus:ring-2 focus:ring-amarelo-400 focus:outline-none">
+            <option value="" disabled selected>Escolha sua Unidade</option>
+            <option value="joao-durval">João Durval</option>
+            <option value="jj-seabra">J. J. Seabra</option>
+            <option value="artemia">Artêmia Pires</option>
+            <option value="fraga-maia">Fraga Maia</option>
+            <option value="so-pra-elas">Só Pra Elas (Exclusivo para Mulheres)</option>
+          </select>
+          <button type="submit"
+            class="font-display w-full h-12 lg:h-auto bg-amarelo-400 text-neutral-950 font-black text-sm uppercase lg:normal-case tracking-wide rounded-xl py-3.5 shadow-md transition-[background-color,transform] duration-200 ease-out hover:bg-amarelo-500 hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0">
+            Quero minha CNH
+          </button>
+          <p class="text-[11px] text-white/70 text-center mt-3">Seus dados estão seguros. Ao enviar, você concorda com a nossa <button type="button" id="open-privacy-form" class="underline hover:text-white">Política de Privacidade</button>.</p>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- =========================================================
+     CENTROS DE TREINAMENTO PRÓPRIOS
+========================================================= -->
+<section id="cts" class="pt-16 pb-8 lg:pt-24 lg:pb-12 bg-neutral-50 scroll-mt-20">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+
+    <!-- Texto -->
+    <div class="reveal-left">
+      <span class="inline-block bg-amarelo-400 text-preto font-display text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6">Estrutura Exclusiva</span>
+      <h2 class="font-display text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-preto leading-[1.15] mb-6">
+        A única com <span class="text-vermelho-500">2</span> Centros de Treinamentos Próprios em Feira de Santana.
+      </h2>
+      <p class="text-neutral-600 text-lg leading-relaxed">
+        Mais segurança, conforto e zero filas de espera. Pratique em pistas exclusivas e acelere a conquista da sua CNH com quem investe no seu aprendizado.
+      </p>
+    </div>
+
+    <!-- Cards dos CTs -->
+    <div class="grid gap-5">
+      <div class="reveal-up group bg-white rounded-2xl border border-neutral-100 border-b-4 border-b-transparent shadow-md p-6 sm:p-7 transition-[transform,border-color,box-shadow] duration-300 ease-out hover:scale-105 hover:border-b-amarelo-400 hover:shadow-col">
+        <div class="h-44 sm:h-48 w-full rounded-xl overflow-hidden relative mb-4 bg-neutral-100">
+          <img src="./assets/ct%20joao%20durval%201.jpg" alt="CT João Durval - foto 1" loading="lazy" class="ct-slide object-cover w-full h-full absolute inset-0" style="animation-delay:0s">
+          <img src="./assets/ct%20joao%20durval%202.jpg" alt="CT João Durval - foto 2" loading="lazy" class="ct-slide object-cover w-full h-full absolute inset-0" style="animation-delay:-3.5s">
+        </div>
+        <div class="w-14 h-14 rounded-xl bg-vermelho-50 text-vermelho-500 flex items-center justify-center mb-5 transition-transform duration-300 ease-out group-hover:scale-110">
+          <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-bold text-preto mb-1.5">CT João Durval</h3>
+        <p class="text-sm text-neutral-500 leading-relaxed">Estrutura própria pensada para conforto e agilidade nas suas aulas práticas.</p>
+      </div>
+
+      <div class="reveal-up group bg-white rounded-2xl border border-neutral-100 border-b-4 border-b-transparent shadow-md p-6 sm:p-7 transition-[transform,border-color,box-shadow] duration-300 ease-out hover:scale-105 hover:border-b-vermelho-500 hover:shadow-col" style="transition-delay: 150ms;">
+        <div class="h-44 sm:h-48 w-full rounded-xl overflow-hidden relative mb-4 bg-neutral-100">
+          <img src="./assets/ct%20artemia%201.jpg" alt="CT Artemia - foto 1" loading="lazy" class="ct-slide object-cover w-full h-full absolute inset-0" style="animation-delay:0s">
+          <img src="./assets/ct%20artemia%202.jpg" alt="CT Artemia - foto 2" loading="lazy" class="ct-slide object-cover w-full h-full absolute inset-0" style="animation-delay:-3.5s">
+        </div>
+        <div class="w-14 h-14 rounded-xl bg-vermelho-50 text-vermelho-500 flex items-center justify-center mb-5 transition-transform duration-300 ease-out group-hover:scale-110">
+          <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-bold text-preto mb-1.5">CT Artemia</h3>
+        <p class="text-sm text-neutral-500 leading-relaxed">Pista própria e exclusiva para prática segura, do primeiro giro de chave à aprovação.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- =========================================================
+     NOSSA FROTA
+========================================================= -->
+<section id="frota" class="pt-8 pb-16 lg:pt-10 lg:pb-20 bg-gray-50 scroll-mt-20">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="text-center max-w-xl mx-auto mb-8 lg:mb-10 reveal">
+      <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-preto mb-4">Nossa Frota</h2>
+      <p class="text-neutral-600 text-lg">Veículos modernos, com ar-condicionado e direção elétrica para o seu aprendizado.</p>
+    </div>
+
+    <div class="lg:hidden flex items-center justify-end gap-1 text-[11px] text-neutral-400 font-medium px-4 mb-2">
+      <span>Deslize para o lado</span>
+      <span>→</span>
+    </div>
+
+    <div class="flex overflow-x-auto lg:grid lg:grid-cols-4 snap-x snap-mandatory gap-4 lg:gap-6 px-4 lg:px-0 -mx-5 lg:mx-0 no-scrollbar py-2 lg:py-0">
+
+      <div class="reveal bg-white rounded-2xl border border-neutral-200/80 shadow-apple overflow-hidden hover:-translate-y-1 transition-transform duration-200 ease-out w-[82vw] sm:w-[60vw] lg:w-auto snap-center shrink-0">
+        <img src="./assets/carro%20automatico.jpg" alt="Carro automático da frota Amorim" width="600" height="338" loading="lazy" class="h-48 w-full object-cover rounded-t-2xl">
+        <div class="p-5">
+          <h3 class="font-bold text-preto text-base mb-1.5">Carros Automáticos</h3>
+          <p class="text-xs text-neutral-500 leading-relaxed">Câmbio automático, direção elétrica e ar-condicionado para máximo conforto no aprendizado.</p>
+        </div>
+      </div>
+
+      <div class="reveal bg-white rounded-2xl border border-neutral-200/80 shadow-apple overflow-hidden hover:-translate-y-1 transition-transform duration-200 ease-out w-[82vw] sm:w-[60vw] lg:w-auto snap-center shrink-0" style="transition-delay:.06s">
+        <img src="./assets/carro%20manual.jpg" alt="Carro manual da frota Amorim" width="600" height="338" loading="lazy" class="h-48 w-full object-cover rounded-t-2xl">
+        <div class="p-5">
+          <h3 class="font-bold text-preto text-base mb-1.5">Carros Manuais</h3>
+          <p class="text-xs text-neutral-500 leading-relaxed">Formação completa em veículo manual moderno com direção assistida e instrutores experientes.</p>
+        </div>
+      </div>
+
+      <div class="reveal bg-white rounded-2xl border border-neutral-200/80 shadow-apple overflow-hidden hover:-translate-y-1 transition-transform duration-200 ease-out w-[82vw] sm:w-[60vw] lg:w-auto snap-center shrink-0" style="transition-delay:.12s">
+        <img src="./assets/motos.jpg" alt="Motocicletas da frota Amorim" width="600" height="338" loading="lazy" class="h-48 w-full object-cover rounded-t-2xl">
+        <div class="p-5">
+          <h3 class="font-bold text-preto text-base mb-1.5">Motocicletas Leves</h3>
+          <p class="text-xs text-neutral-500 leading-relaxed">Categoria A em circuito próprio, seguro e sem tráfego para total confiança no aprendizado.</p>
+        </div>
+      </div>
+
+      <div class="reveal bg-white rounded-2xl border border-neutral-200/80 shadow-apple overflow-hidden hover:-translate-y-1 transition-transform duration-200 ease-out w-[82vw] sm:w-[60vw] lg:w-auto snap-center shrink-0" style="transition-delay:.18s">
+        <img src="./assets/onibus.jpg" alt="Ônibus da frota Amorim" width="600" height="338" loading="lazy" class="h-48 w-full object-cover rounded-t-2xl">
+        <div class="p-5">
+          <h3 class="font-bold text-preto text-base mb-1.5">Ônibus — Categoria D</h3>
+          <p class="text-xs text-neutral-500 leading-relaxed">Frota própria e adaptada para formação profissional e mudança de categoria.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     DIFERENCIAIS
+========================================================= -->
+<section id="diferenciais" class="py-20 lg:py-28 bg-amarelo-400 scroll-mt-20">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="text-center max-w-xl mx-auto mb-14 reveal">
+      <p class="font-display text-xs font-bold uppercase tracking-wider text-vermelho-500 mb-3">Por que a Amorim</p>
+      <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-preto mb-4">Diferenciais que aceleram sua habilitação</h2>
+      <p class="text-preto/70">Estrutura completa, agilidade real e atendimento humano em cada etapa do processo.</p>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+      <div class="reveal bg-white rounded-2xl p-3 sm:p-4 lg:p-7 shadow-md transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-2 hover:shadow-col">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-amarelo-50 text-vermelho-500 flex items-center justify-center mb-3 sm:mb-4 lg:mb-5">
+          <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+        </div>
+        <h3 class="text-xs sm:text-sm lg:text-base font-bold text-preto mb-2">Aula no mesmo dia</h3>
+        <p class="text-[11px] sm:text-xs lg:text-sm leading-tight lg:leading-relaxed text-neutral-600 lg:text-neutral-500">A única que garante aula de carro ou moto no mesmo dia da matrícula.</p>
+      </div>
+
+      <div class="reveal bg-white rounded-2xl p-3 sm:p-4 lg:p-7 shadow-md transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-2 hover:shadow-col" style="transition-delay:.08s">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-amarelo-50 text-vermelho-500 flex items-center justify-center mb-3 sm:mb-4 lg:mb-5">
+          <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13l1.5-4.5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.5L21 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 13h16v4a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-4z"/></svg>
+        </div>
+        <h3 class="text-xs sm:text-sm lg:text-base font-bold text-preto mb-2">Frota moderna</h3>
+        <p class="text-[11px] sm:text-xs lg:text-sm leading-tight lg:leading-relaxed text-neutral-600 lg:text-neutral-500">Veículos modernos, incluindo elétricos, para aprender com conforto.</p>
+      </div>
+
+      <div class="reveal bg-white rounded-2xl p-3 sm:p-4 lg:p-7 shadow-md transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-2 hover:shadow-col" style="transition-delay:.16s">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-amarelo-50 text-vermelho-500 flex items-center justify-center mb-3 sm:mb-4 lg:mb-5">
+          <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="12" rx="2"/><path stroke-linecap="round" d="M3 10h18"/></svg>
+        </div>
+        <h3 class="text-xs sm:text-sm lg:text-base font-bold text-preto mb-2">Parcele em até 24x</h3>
+        <p class="text-[11px] sm:text-xs lg:text-sm leading-tight lg:leading-relaxed text-neutral-600 lg:text-neutral-500">Condições facilitadas para você não adiar o sonho da sua CNH.</p>
+      </div>
+
+      <div class="reveal bg-white rounded-2xl p-3 sm:p-4 lg:p-7 shadow-md transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-2 hover:shadow-col" style="transition-delay:.24s">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-amarelo-50 text-vermelho-500 flex items-center justify-center mb-3 sm:mb-4 lg:mb-5">
+          <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4.4-2.8-8-6.4-8-11a8 8 0 0 1 16 0c0 4.6-3.6 8.2-8 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        </div>
+        <h3 class="text-xs sm:text-sm lg:text-base font-bold text-preto mb-2">5 Unidades</h3>
+        <p class="text-[11px] sm:text-xs lg:text-sm leading-tight lg:leading-relaxed text-neutral-600 lg:text-neutral-500">Estrutura espalhada por Feira de Santana, perto de onde você está.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     SERVIÇOS — SELETOR DE ABAS
+========================================================= -->
+<section id="servicos" class="pt-20 lg:pt-28 pb-8 lg:pb-12 bg-neutral-50 scroll-mt-20">
+  <div class="max-w-5xl mx-auto px-5 lg:px-8">
+    <div class="text-center max-w-xl mx-auto mb-12 reveal">
+      <p class="font-display text-xs font-bold uppercase tracking-wider text-vermelho-500 mb-3">Serviços</p>
+      <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-preto mb-4">Escolha o processo que você precisa</h2>
+      <p class="text-neutral-500">Tudo o que você precisa para tirar, ampliar ou renovar sua habilitação em um só lugar.</p>
+    </div>
+
+    <div class="reveal">
+      <div role="tablist" class="flex flex-wrap justify-center gap-1 bg-white border border-neutral-100 rounded-full p-1.5 shadow-apple max-w-3xl mx-auto mb-10">
+        <button data-tab="0" role="tab" aria-selected="true" class="tab-btn is-active flex-1 min-w-[140px] px-4 py-2.5 text-sm font-semibold rounded-full border transition-colors duration-200 ease-out">Primeira Habilitação A/B</button>
+        <button data-tab="1" role="tab" aria-selected="false" class="tab-btn flex-1 min-w-[140px] px-4 py-2.5 text-sm font-semibold rounded-full border transition-colors duration-200 ease-out">Adição de Categoria</button>
+        <button data-tab="2" role="tab" aria-selected="false" class="tab-btn flex-1 min-w-[140px] px-4 py-2.5 text-sm font-semibold rounded-full border transition-colors duration-200 ease-out">Renovação</button>
+        <button data-tab="3" role="tab" aria-selected="false" class="tab-btn flex-1 min-w-[140px] px-4 py-2.5 text-sm font-semibold rounded-full border transition-colors duration-200 ease-out">Reciclagem</button>
+      </div>
+
+      <div class="tab-stack relative min-h-[340px] sm:min-h-[280px]">
+        <div class="tab-panel active bg-white rounded-2xl border border-neutral-100 shadow-apple p-8 sm:p-10 grid sm:grid-cols-[auto,1fr] gap-6 items-start">
+          <div class="w-14 h-14 rounded-xl bg-amarelo-50 text-vermelho-500 flex items-center justify-center shrink-0">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.25C10.5 4.75 8 4 6 4.5v13.5c2 0 4.5.75 6 2.25 1.5-1.5 4-2.25 6-2.25V4.5c-2-.5-4.5.25-6 1.75z"/></svg>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-bold text-preto mb-2">Primeira Habilitação A/B</h3>
+            <p class="text-sm text-neutral-500 mb-5 leading-relaxed">Do exame médico à emissão da carteira: acompanhamos você em cada etapa, com aulas teóricas e práticas para moto e carro.</p>
+            <ul class="text-sm text-neutral-600 space-y-2 mb-6">
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Exame médico e psicotécnico</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Curso teórico-técnico</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Aulas práticas de carro ou moto</li>
+            </ul>
+            <a href="https://whatsapp.amorimautoescola.com.br" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-semibold text-vermelho-500 hover:underline transition-colors">Falar com a equipe <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+
+        <div class="tab-panel bg-white rounded-2xl border border-neutral-100 shadow-apple p-8 sm:p-10 grid sm:grid-cols-[auto,1fr] gap-6 items-start">
+          <div class="w-14 h-14 rounded-xl bg-amarelo-50 text-vermelho-500 flex items-center justify-center shrink-0">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16V8a1 1 0 0 1 1-1h8v9M12 10h5.5l2.5 3v3"/><circle cx="7" cy="17" r="1.6"/><circle cx="17" cy="17" r="1.6"/></svg>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-bold text-preto mb-2">Adição de Categoria</h3>
+            <p class="text-sm text-neutral-500 mb-5 leading-relaxed">Já tem CNH e quer dirigir moto, ou avançar para as categorias C e D? Fazemos a adição com aulas teóricas e práticas específicas.</p>
+            <ul class="text-sm text-neutral-600 space-y-2 mb-6">
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Categoria A (moto)</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Categorias C e D</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Aproveitamento de créditos, quando aplicável</li>
+            </ul>
+            <a href="https://whatsapp.amorimautoescola.com.br" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-semibold text-vermelho-500 hover:underline transition-colors">Falar com a equipe <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+
+        <div class="tab-panel bg-white rounded-2xl border border-neutral-100 shadow-apple p-8 sm:p-10 grid sm:grid-cols-[auto,1fr] gap-6 items-start">
+          <div class="w-14 h-14 rounded-xl bg-amarelo-50 text-vermelho-500 flex items-center justify-center shrink-0">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5"/><path stroke-linecap="round" stroke-linejoin="round" d="M4.6 15A8 8 0 0 0 19 13.5M19.4 9A8 8 0 0 0 5 10.5"/></svg>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-bold text-preto mb-2">Renovação</h3>
+            <p class="text-sm text-neutral-500 mb-5 leading-relaxed">CNH vencida ou perto de vencer? Cuidamos de toda a burocracia da renovação para você continuar dirigindo tranquilo.</p>
+            <ul class="text-sm text-neutral-600 space-y-2 mb-6">
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Exame médico e psicotécnico</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Encaminhamento ao Detran</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Processo rápido e sem filas</li>
+            </ul>
+            <a href="https://whatsapp.amorimautoescola.com.br" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-semibold text-vermelho-500 hover:underline transition-colors">Falar com a equipe <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+
+        <div class="tab-panel bg-white rounded-2xl border border-neutral-100 shadow-apple p-8 sm:p-10 grid sm:grid-cols-[auto,1fr] gap-6 items-start">
+          <div class="w-14 h-14 rounded-xl bg-amarelo-50 text-vermelho-500 flex items-center justify-center shrink-0">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-bold text-preto mb-2">Reciclagem</h3>
+            <p class="text-sm text-neutral-500 mb-5 leading-relaxed">Curso de reciclagem para condutores infratores ou por determinação judicial, com foco na segurança no trânsito.</p>
+            <ul class="text-sm text-neutral-600 space-y-2 mb-6">
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Curso teórico de atualização</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Turmas frequentes</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-vermelho-500"></span>Emissão de certificado</li>
+            </ul>
+            <a href="https://whatsapp.amorimautoescola.com.br" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-semibold text-vermelho-500 hover:underline transition-colors">Falar com a equipe <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     UNIDADES
+========================================================= -->
+<section id="unidades" class="pt-8 sm:pt-10 lg:pt-12 pb-16 lg:pb-20 bg-neutral-50 scroll-mt-20">
+  <div class="max-w-6xl mx-auto px-5 lg:px-8">
+    <div class="text-center max-w-xl mx-auto mb-8 lg:mb-10 reveal">
+      <p class="font-display text-xs font-bold uppercase tracking-wider text-vermelho-500 mb-3">Onde estamos</p>
+      <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-preto mb-4">Nossas unidades em Feira de Santana</h2>
+      <p class="text-neutral-500">5 unidades espalhadas pela cidade para você escolher a mais perto de você.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-12 gap-8 items-stretch">
+      <!-- Cards clicáveis -->
+      <div class="lg:col-span-5 flex overflow-x-auto lg:flex-col lg:overflow-visible snap-x snap-mandatory gap-3 lg:gap-4 px-4 lg:px-0 -mx-5 lg:mx-0 py-2 pb-3 lg:pb-0 no-scrollbar">
+        <div role="button" tabindex="0" data-unit="joao-durval"
+          class="unit-card reveal text-left w-[78vw] sm:w-[50vw] lg:w-full bg-white border-2 border-transparent rounded-2xl p-3.5 lg:p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_25px_-4px_rgba(0,0,0,0.12)] hover:border-amarelo-400 hover:scale-[1.01] transition-all duration-200 ease-out cursor-pointer min-w-[78vw] sm:min-w-[50vw] lg:min-w-0 snap-center shrink-0">
+          <h3 class="font-bold text-vermelho-500 mb-1">Unidade João Durval</h3>
+          <p class="line-clamp-2 lg:line-clamp-none text-xs lg:text-sm text-neutral-600 mb-2 lg:mb-0">Av. João Durval Carneiro, 1381 - Brasília, Feira de Santana - BA, 44088-113</p>
+          <a href="https://maps.app.goo.gl/94cQCtPtPA7uRrcS7" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs font-semibold text-vermelho-500 hover:underline transition-colors mt-3">Traçar Rota no Google Maps <span aria-hidden="true">→</span></a>
+        </div>
+        <div role="button" tabindex="0" data-unit="jj-seabra" style="transition-delay:.06s"
+          class="unit-card reveal text-left w-[78vw] sm:w-[50vw] lg:w-full bg-white border-2 border-transparent rounded-2xl p-3.5 lg:p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_25px_-4px_rgba(0,0,0,0.12)] hover:border-amarelo-400 hover:scale-[1.01] transition-all duration-200 ease-out cursor-pointer min-w-[78vw] sm:min-w-[50vw] lg:min-w-0 snap-center shrink-0">
+          <h3 class="font-bold text-vermelho-500 mb-1">Unidade J. J. Seabra</h3>
+          <p class="line-clamp-2 lg:line-clamp-none text-xs lg:text-sm text-neutral-600 mb-2 lg:mb-0">R. José Joaquim Seabra, 350 - Centro, Feira de Santana - BA, 44002-000</p>
+          <a href="https://maps.app.goo.gl/33qAvo2tV6RgaRDG8" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs font-semibold text-vermelho-500 hover:underline transition-colors mt-3">Traçar Rota no Google Maps <span aria-hidden="true">→</span></a>
+        </div>
+        <div role="button" tabindex="0" data-unit="artemia" style="transition-delay:.12s"
+          class="unit-card reveal text-left w-[78vw] sm:w-[50vw] lg:w-full bg-white border-2 border-transparent rounded-2xl p-3.5 lg:p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_25px_-4px_rgba(0,0,0,0.12)] hover:border-amarelo-400 hover:scale-[1.01] transition-all duration-200 ease-out cursor-pointer min-w-[78vw] sm:min-w-[50vw] lg:min-w-0 snap-center shrink-0">
+          <h3 class="font-bold text-vermelho-500 mb-1">Unidade Artêmia Pires</h3>
+          <p class="line-clamp-2 lg:line-clamp-none text-xs lg:text-sm text-neutral-600 mb-2 lg:mb-0">Av. Artêmia Pires Freitas, 8750 - Sim, Feira de Santana - BA, 44073-540</p>
+          <a href="https://maps.app.goo.gl/eirQQfZJffhcNLh37" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs font-semibold text-vermelho-500 hover:underline transition-colors mt-3">Traçar Rota no Google Maps <span aria-hidden="true">→</span></a>
+        </div>
+        <div role="button" tabindex="0" data-unit="fraga-maia" style="transition-delay:.18s"
+          class="unit-card reveal text-left w-[78vw] sm:w-[50vw] lg:w-full bg-white border-2 border-transparent rounded-2xl p-3.5 lg:p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_25px_-4px_rgba(0,0,0,0.12)] hover:border-amarelo-400 hover:scale-[1.01] transition-all duration-200 ease-out cursor-pointer min-w-[78vw] sm:min-w-[50vw] lg:min-w-0 snap-center shrink-0">
+          <h3 class="font-bold text-vermelho-500 mb-1">Unidade Fraga Maia</h3>
+          <p class="line-clamp-2 lg:line-clamp-none text-xs lg:text-sm text-neutral-600 mb-2 lg:mb-0">Av. Francisco Fraga Maia, 5200 - Mangabeira, Feira de Santana - BA, 44100-000</p>
+          <a href="https://maps.app.goo.gl/VEyXALoSHnfC86MNA" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs font-semibold text-vermelho-500 hover:underline transition-colors mt-3">Traçar Rota no Google Maps <span aria-hidden="true">→</span></a>
+        </div>
+        <div role="button" tabindex="0" data-unit="so-pra-elas" style="transition-delay:.24s"
+          class="unit-card reveal text-left w-[78vw] sm:w-[50vw] lg:w-full bg-white border-2 border-[#E11D74]/30 rounded-2xl p-3.5 lg:p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_25px_-4px_rgba(225,29,116,0.25)] hover:border-[#E11D74] hover:scale-[1.01] transition-all duration-200 ease-out cursor-pointer min-w-[78vw] sm:min-w-[50vw] lg:min-w-0 snap-center shrink-0">
+          <h3 class="font-bold text-[#E11D74] mb-1">Unidade Só Pra Elas</h3>
+          <p class="line-clamp-2 lg:line-clamp-none text-xs lg:text-sm text-neutral-600 mb-2 lg:mb-0">Av. Getúlio Vargas, 1631 - Centro, Feira de Santana - BA, 44076-015</p>
+          <p class="font-display text-xs font-bold text-[#E11D74] uppercase tracking-wide mt-2">Espaço exclusivo para mulheres</p>
+          <p class="text-xs text-neutral-500 leading-relaxed mt-2">Atendimento, estrutura e aulas pensadas com total privacidade, conforto e instrutoras dedicadas exclusivamente ao público feminino.</p>
+          <a href="https://maps.app.goo.gl/xxuUM2H3mzbPfNqZ8" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[#E11D74] hover:text-[#c21461] font-semibold text-xs transition-colors mt-3">Traçar Rota no Google Maps <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+
+      <!-- Mapa Google -->
+      <div class="lg:col-span-7 lg:sticky lg:top-24 reveal" style="transition-delay:.1s">
+        <div class="bg-white p-2.5 rounded-3xl shadow-apple border border-neutral-200/80 overflow-hidden">
+          <iframe
+            id="google-maps-frame"
+            title="Mapa de localização da unidade selecionada"
+            class="w-full h-[280px] sm:h-[350px] lg:h-[480px] rounded-2xl border-0 block"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps?q=Av.+João+Durval+Carneiro,+1381+-+Brasília,+Feira+de+Santana+-+BA&output=embed">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     CTA FINAL
+========================================================= -->
+<section id="contato" class="py-20 lg:py-24 bg-gradient-to-b from-vermelho-500 via-vermelho-700 to-[#0d0d0d] scroll-mt-20">
+  <div class="max-w-3xl mx-auto px-5 lg:px-8 text-center reveal">
+    <h2 class="font-display text-3xl sm:text-4xl font-black tracking-tight text-white mb-4">Pronto para acelerar seu processo?</h2>
+    <p class="text-white/80 mb-8">Fale agora com a nossa equipe pelo WhatsApp e comece hoje mesmo.</p>
+    <a href="https://whatsapp.amorimautoescola.com.br" target="_blank" rel="noopener noreferrer"
+       class="font-display inline-flex items-center gap-2 bg-amarelo-400 text-preto font-bold text-sm px-8 py-4 rounded-full shadow-col transition-[background-color,transform] duration-200 ease-out hover:scale-105 hover:bg-amarelo-500 active:scale-95">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6.5C10.753 6.5 6.5 10.753 6.5 16c0 1.77.487 3.427 1.336 4.846L6.5 25.5l4.823-1.299A9.458 9.458 0 0016 25.5c5.247 0 9.5-4.253 9.5-9.5S21.247 6.5 16 6.5zm5.534 13.064c-.23.645-1.144 1.185-1.597 1.258-.413.066-.948.093-1.53-.093-.356-.113-.816-.279-1.408-.535-2.483-1.074-4.103-3.585-4.227-3.75-.124-.165-1.008-1.34-1.008-2.556 0-1.216.638-1.814.865-2.062.227-.247.495-.309.66-.309.165 0 .33.002.474.009.153.008.358-.058.558.423.206.495.702 1.713.764 1.837.062.124.103.268.02.433-.082.165-.124.268-.247.412-.124.144-.26.322-.372.433-.124.124-.253.258-.109.505.144.247.64 1.055 1.374 1.709.945.842 1.742 1.103 1.99 1.227.247.124.392.103.536-.062.144-.165.619-.722.784-.97.165-.247.33-.206.557-.124.227.082 1.444.681 1.692.805.247.124.412.186.474.289.062.103.062.598-.168 1.243z" fill="#FFFFFF"/></svg>
+      Fale no WhatsApp
+    </a>
+  </div>
+</section>
+
+</main>
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+<footer class="bg-preto-900 text-neutral-400">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 py-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+    <div>
+      <div class="flex items-center gap-3 mb-4">
+        <img src="./assets/logo_autoescola_amorim_transparente.png" alt="Auto Escola Amorim" width="40" height="40" loading="lazy" class="h-10 w-auto">
+        <span class="font-display text-white font-extrabold text-sm leading-tight">AUTO ESCOLA<br>AMORIM</span>
+      </div>
+      <p class="text-sm leading-relaxed">Centro de Formação de Condutores em Feira de Santana, Bahia. Sua CNH com agilidade e segurança.</p>
+    </div>
+
+    <div>
+      <h4 class="text-white font-semibold text-sm mb-4">Navegação</h4>
+      <ul class="space-y-2.5 text-sm">
+        <li><a href="#diferenciais" class="hover:text-white transition-colors">Diferenciais</a></li>
+        <li><a href="#servicos" class="hover:text-white transition-colors">Serviços</a></li>
+        <li><a href="#unidades" class="hover:text-white transition-colors">Unidades</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4 class="text-white font-semibold text-sm mb-4">Unidades</h4>
+      <ul class="space-y-2.5 text-sm">
+        <li>João Durval — Brasília</li>
+        <li>J. J. Seabra — Centro</li>
+        <li>Artêmia Pires — Bairro Sim</li>
+        <li>Fraga Maia — Mangabeira</li>
+        <li>Só Pra Elas — Exclusivo para mulheres (Av. Getúlio Vargas)</li>
+      </ul>
+    </div>
+
+    <div>
+      <h4 class="text-white font-semibold text-sm mb-4">Contato</h4>
+      <ul class="space-y-2.5 text-sm">
+        <li>
+          <span class="inline-flex items-center gap-2">
+            <svg class="w-4 h-4 text-neutral-400 shrink-0 fill-current" viewBox="0 0 24 24">
+              <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+            </svg>
+            <a href="tel:7530230030" class="hover:text-white transition-colors">(75) 3023-0030</a>
+          </span>
+        </li>
+        <li><a href="https://instagram.com/autoescola_amorim" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">📸 @autoescola_amorim</a></li>
+        <li>Seg a Sex · 8h às 18h</li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 text-xs text-neutral-400">
+      <p>© 2026 Auto Escola Amorim. Todos os direitos reservados.</p>
+
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <button id="open-privacy" class="hover:text-white underline underline-offset-4 transition-colors">Política de Privacidade</button>
+        <span class="text-white/20">•</span>
+        <p class="inline-flex items-center gap-1.5 text-neutral-400">
+          Desenvolvido por
+          <span class="font-bold text-white tracking-wide hover:text-[#F5B800] transition-colors cursor-pointer">Pulse Digital</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- =========================================================
+     WHATSAPP FLUTUANTE
+========================================================= -->
+<div class="fixed bottom-5 right-5 lg:bottom-6 lg:right-6 z-40 flex items-center justify-center">
+  <!-- Aura de pulso suave -->
+  <span class="absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-60 animate-ping pointer-events-none"></span>
+
+  <!-- Botão principal -->
+  <a href="https://whatsapp.amorimautoescola.com.br/?utm_source=ig&utm_medium=social&utm_content=link_in_bio" target="_blank" rel="noopener noreferrer" aria-label="Fale conosco no WhatsApp"
+     class="relative z-10 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-[#25D366] hover:bg-[#20bd5a] shadow-[0_4px_20px_rgba(37,211,102,0.45)] hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center p-2.5">
+    <svg class="w-full h-full fill-white" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 012.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 01-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24zm4.52 11.23c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.25-.75-.67-1.26-1.5-1.41-1.75-.14-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.72 4.31 3.81.6.26 1.07.42 1.44.53.61.19 1.16.16 1.6-.08.49-.26 1.47-.6 1.68-1.18.21-.57.21-1.07.14-1.18-.06-.13-.23-.19-.48-.31z"/></svg>
+  </a>
+</div>
+
+<script>
+  // ---------- Splash screen ----------
+  // Sequencia: mostra por ~2.2s, desliza para cima 700ms, libera o scroll do body.
+  const splash = document.getElementById('splash');
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      splash.classList.add('leave');
+      document.body.classList.remove('locked');
+      splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+    }, 2200);
+  });
+  // Segurança: se o evento load nunca disparar (ex: recurso externo lento), libera assim mesmo.
+  setTimeout(() => {
+    if (document.body.classList.contains('locked')) {
+      splash.classList.add('leave');
+      document.body.classList.remove('locked');
+    }
+  }, 4000);
+
+  // ---------- Menu mobile ----------
+  const menuToggle = document.getElementById('menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const iconOpen = document.getElementById('icon-open');
+  const iconClose = document.getElementById('icon-close');
+
+  menuToggle.addEventListener('click', () => {
+    const isOpen = !mobileMenu.classList.contains('hidden');
+    mobileMenu.classList.toggle('hidden');
+    iconOpen.classList.toggle('hidden');
+    iconClose.classList.toggle('hidden');
+    menuToggle.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  document.querySelectorAll('.mobile-link').forEach((link) => {
+    link.addEventListener('click', () => {
+      mobileMenu.classList.add('hidden');
+      iconOpen.classList.remove('hidden');
+      iconClose.classList.add('hidden');
+      menuToggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  // ---------- Header: esconder ao rolar para baixo, reaparecer ao rolar para cima ----------
+  const navbar = document.getElementById('navbar');
+  let lastScrollTop = 0;
+
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (currentScroll > lastScrollTop && currentScroll > 15) {
+      navbar.classList.add('-translate-y-full');
+    } else {
+      navbar.classList.remove('-translate-y-full');
+    }
+
+    lastScrollTop = Math.max(0, currentScroll);
+  }, { passive: true });
+
+  // ---------- Scroll reveal ----------
+  const revealEls = document.querySelectorAll('.reveal');
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach((el) => revealObserver.observe(el));
+
+  // ---------- Seletor de abas (Serviços) ----------
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+
+  tabButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const index = btn.dataset.tab;
+
+      tabButtons.forEach((b) => {
+        const active = b === btn;
+        b.setAttribute('aria-selected', String(active));
+        b.classList.toggle('is-active', active);
+      });
+
+      tabPanels.forEach((panel, i) => {
+        panel.classList.toggle('active', String(i) === index);
+      });
+    });
+  });
+
+  // ---------- Formulário do Hero -> WhatsApp da unidade selecionada ----------
+  const heroForm = document.getElementById('hero-form');
+
+  const UNIDADES_WHATSAPP = {
+    'joao-durval': '5575993010030',
+    'jj-seabra': '5575991151793',
+    'artemia': '5575992935378',
+    'fraga-maia': '5575983696045',
+    'so-pra-elas': '5575999170816'
+  };
+
+  heroForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const nome = document.getElementById('hf-nome').value.trim();
+    const categoria = document.getElementById('hf-categoria').value;
+    const unidadeSelect = document.getElementById('hf-unidade');
+    const unidadeChave = unidadeSelect.value;
+    const unidadeNome = unidadeSelect.selectedOptions[0]?.text || '';
+    const numeroUnidade = UNIDADES_WHATSAPP[unidadeChave];
+
+    // Sem unidade válida selecionada: força a validação nativa do <select required>
+    // (mostra o balão "Selecione um item na lista") em vez de disparar a mensagem.
+    if (!numeroUnidade) {
+      unidadeSelect.reportValidity();
+      return;
+    }
+
+    // A unidade Só Pra Elas leva uma frase fixa reforçando a exclusividade,
+    // independente do rótulo exibido no <select>.
+    const mensagem = unidadeChave === 'so-pra-elas'
+      ? `Olá! Me chamo ${nome}. Vim pelo site e desejo fazer um orçamento para ${categoria} na Unidade Só Pra Elas (Espaço exclusivo para mulheres).`
+      : `Olá! Me chamo ${nome}. Vim pelo site e desejo fazer um orçamento para ${categoria} na Unidade ${unidadeNome}.`;
+    const url = `https://wa.me/${numeroUnidade}?text=${encodeURIComponent(mensagem)}`;
+    window.open(url, '_blank', 'noopener');
+  });
+
+  // ---------- Mapa das Unidades (Google Maps embed) ----------
+  // Este script já roda no fim do <body>, então o DOM está pronto — por isso
+  // NÃO é envolvido em 'DOMContentLoaded' (esse evento já teria disparado antes
+  // de chegar aqui, e um listener novo pendurado nele nunca seria chamado).
+  const iframeMap = document.getElementById('google-maps-frame');
+  const unitCards = document.querySelectorAll('.unit-card');
+
+  const linksMaps = {
+    'joao-durval': 'https://www.google.com/maps?q=Av.+João+Durval+Carneiro,+1381+-+Brasília,+Feira+de+Santana+-+BA&output=embed',
+    'jj-seabra': 'https://www.google.com/maps?q=R.+José+Joaquim+Seabra,+350+-+Centro,+Feira+de+Santana+-+BA&output=embed',
+    'fraga-maia': 'https://www.google.com/maps?q=Av.+Francisco+Fraga+Maia,+5200+-+Mangabeira,+Feira+de+Santana+-+BA&output=embed',
+    'so-pra-elas': 'https://www.google.com/maps?q=Av.+Getúlio+Vargas,+1631+-+Centro,+Feira+de+Santana+-+BA&output=embed',
+    'artemia': 'https://www.google.com/maps?q=Av.+Artêmia+Pires+Freitas,+8750+-+Sim,+Feira+de+Santana+-+BA&output=embed'
+  };
+
+  unitCards.forEach((card) => {
+    const selecionarUnidade = () => {
+      const unitId = card.getAttribute('data-unit');
+      if (linksMaps[unitId] && iframeMap) {
+        iframeMap.src = linksMaps[unitId];
+
+        // Destaque visual no card selecionado
+        unitCards.forEach((c) => c.classList.remove('is-active'));
+        card.classList.add('is-active');
+      }
+    };
+
+    card.addEventListener('click', selecionarUnidade);
+
+    // Os cards agora são <div role="button"> (não <button> nativo — HTML não permite
+    // aninhar o link "Traçar Rota" dentro de um <button>), então Enter/Espaço
+    // precisam ser cabeados manualmente para manter a acessibilidade por teclado.
+    card.addEventListener('keydown', (e) => {
+      if (e.target !== card) return; // deixa o Enter do link interno navegar normalmente
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selecionarUnidade();
+      }
+    });
+  });
+</script>
+
+<!-- =========================================================
+     MODAL — POLÍTICA DE PRIVACIDADE (LGPD)
+========================================================= -->
+<div id="privacy-modal" class="hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="privacy-modal-title">
+  <div class="max-w-2xl w-[92%] max-h-[85vh] bg-white border border-neutral-200 rounded-2xl p-6 text-neutral-900 shadow-2xl flex flex-col">
+    <div class="flex items-center justify-between mb-4 shrink-0">
+      <h2 id="privacy-modal-title" class="font-display text-lg font-bold text-neutral-900">Política de Privacidade</h2>
+      <button id="close-privacy" aria-label="Fechar" class="w-8 h-8 flex items-center justify-center rounded-full text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors">✕</button>
+    </div>
+
+    <div class="overflow-y-auto pr-2 text-xs leading-relaxed space-y-4">
+      <p class="text-neutral-600 leading-relaxed">A Auto Escola Amorim (Feira de Santana - BA) respeita a sua privacidade e está comprometida em cumprir a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD). Esta política explica de forma simples como tratamos os dados coletados através dos formulários deste site.</p>
+
+      <div>
+        <h3 class="text-neutral-900 font-bold text-sm mb-1.5">1. Quais dados coletamos</h3>
+        <p class="text-neutral-600 leading-relaxed">A coleta é restrita ao necessário para o atendimento comercial: <strong class="text-neutral-900 font-semibold">nome, telefone/WhatsApp</strong> e a <strong class="text-neutral-900 font-semibold">categoria de CNH ou serviço de interesse</strong> (ex.: primeira habilitação, adição de categoria, renovação). Não solicitamos dados sensíveis, financeiros ou de documentos neste formulário.</p>
+      </div>
+
+      <div>
+        <h3 class="text-neutral-900 font-bold text-sm mb-1.5">2. Para que usamos seus dados</h3>
+        <p class="text-neutral-600 leading-relaxed">Usamos essas informações exclusivamente para entrar em contato direto com você — por telefone ou WhatsApp — a fim de tirar dúvidas, agendar aulas ou exames, e enviar orçamentos e planos de habilitação personalizados. Não utilizamos seus dados para nenhuma outra finalidade.</p>
+      </div>
+
+      <div>
+        <h3 class="text-neutral-900 font-bold text-sm mb-1.5">3. Compartilhamento com terceiros</h3>
+        <p class="text-neutral-600 leading-relaxed">Seus dados <strong class="text-neutral-900 font-semibold">não são vendidos, alugados ou repassados</strong> a terceiros não autorizados. As informações ficam restritas à equipe interna da Auto Escola Amorim, responsável pelo atendimento comercial.</p>
+      </div>
+
+      <div>
+        <h3 class="text-neutral-900 font-bold text-sm mb-1.5">4. Seus direitos como titular dos dados</h3>
+        <p class="text-neutral-600 leading-relaxed">De acordo com a LGPD, você pode, a qualquer momento, solicitar a confirmação, o acesso, a correção ou a <strong class="text-neutral-900 font-semibold">exclusão dos seus dados de contato</strong>. Para exercer esse direito, basta enviar uma mensagem pelo nosso WhatsApp oficial de atendimento pedindo a remoção dos seus dados — o pedido será atendido em prazo razoável.</p>
+      </div>
+
+      <div>
+        <h3 class="text-neutral-900 font-bold text-sm mb-1.5">5. Responsável pelo tratamento dos dados</h3>
+        <p class="text-neutral-600 leading-relaxed"><strong class="text-neutral-900 font-semibold">Auto Escola Amorim</strong> — Centro de Formação de Condutores, Feira de Santana - BA. Dúvidas sobre esta política também podem ser enviadas pelo WhatsApp de atendimento disponível no site.</p>
+      </div>
+    </div>
+
+    <div class="mt-5 pt-4 border-t border-neutral-200 shrink-0">
+      <button id="privacy-agree" class="font-display w-full bg-amarelo-400 text-preto font-bold text-sm rounded-xl py-3 transition-colors duration-200 ease-out hover:bg-amarelo-500">
+        Entendi e Concordo
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- Modal: Política de Privacidade ----------
+  const privacyModal = document.getElementById('privacy-modal');
+  const openPrivacyBtns = [document.getElementById('open-privacy'), document.getElementById('open-privacy-form')];
+  const closePrivacyBtns = [document.getElementById('close-privacy'), document.getElementById('privacy-agree')];
+
+  const openPrivacyModal = () => {
+    privacyModal.classList.remove('hidden');
+    document.body.classList.add('locked');
+  };
+  const closePrivacyModal = () => {
+    privacyModal.classList.add('hidden');
+    document.body.classList.remove('locked');
+  };
+
+  openPrivacyBtns.forEach((btn) => btn && btn.addEventListener('click', openPrivacyModal));
+  closePrivacyBtns.forEach((btn) => btn && btn.addEventListener('click', closePrivacyModal));
+
+  // Fecha ao clicar fora do container (no próprio overlay)
+  privacyModal.addEventListener('click', (e) => {
+    if (e.target === privacyModal) closePrivacyModal();
+  });
+
+  // Fecha com Esc, só quando o modal está de fato aberto
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !privacyModal.classList.contains('hidden')) closePrivacyModal();
+  });
+</script>
+
+<script>
+  // ---------- Scroll reveal direcional (seção Centros de Treinamento) ----------
+  document.addEventListener('DOMContentLoaded', () => {
+    const revealElements = document.querySelectorAll('.reveal-left, .reveal-up');
+
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal-visible');
+          observer.unobserve(entry.target); // Executa apenas uma vez
+        }
+      });
+    }, {
+      threshold: 0.15,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    revealElements.forEach(el => revealObserver.observe(el));
+  });
+</script>
+
+<script>
+  // ---------- Chip "Só Pra Elas": scroll suave até o card, sem teletransporte ----------
+  const btnSoPraElas = document.getElementById('chip-sopraelas');
+  const cardSoPraElas = document.getElementById('unidade-sopraelas');
+
+  if (btnSoPraElas && cardSoPraElas) {
+    btnSoPraElas.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      cardSoPraElas.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+
+      cardSoPraElas.classList.add('sopraelas-highlight');
+      setTimeout(() => {
+        cardSoPraElas.classList.remove('sopraelas-highlight');
+      }, 1500);
+    });
+  }
+</script>
+</body>
+</html>
